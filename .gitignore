@@ -1,54 +1,11 @@
 HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
 .DS_Store
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-*.jar
-*.log
-*.log.*
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
-.vscode/
-
-.DS_Store
-
-/docker/postgres
-/logs
-/docker/shumipro_front
-/docker/shumipro_api
-/docker/shumipro_batch
-/docker/local_env/es-data
+/docker/IcchannelBackend
+/docker/IcchannelFrontend
+/docker/IcchannelLocal/es-data
+/docker/IcchannelLocal/mysql
 /docker/letsencrypt/live
-/docker/letsencryp/
 *.pem
 /docker/letsencrypt/
+
