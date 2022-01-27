@@ -1,52 +1,53 @@
 version: '3'
 
 services:
-    redis_session:
+    redis:
         image: "redis:latest"
         ports:
             - "6379:6379"
         volumes:
             - "./data/redis:/data/redis"
 
-    postgresql:
-        image: "postgres:latest"
-        ports:
-            - "5432:5432"
-        volumes:
-            - "./postgres/init:/data/postgresql"
-            - "./postgres/data:/var/lib/postgresql/data"
+    mysql:
+        image: "mysql:latest"
+        container_name: icchannel_db
         environment:
-            POSTGRES_USER: $DB_USERNAME
-            POSTGRES_PASSWORD: $DB_PASSWORD
-            POSTGRES_DB: shumi_db
-            POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: icchannel_db
+            MYSQL_USER: shumiya
+            MYSQL_PASSWORD: shumiya
+            TZ: 'Asia/Tokyo'
+        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        volumes:
+            - ./mysql/data:/var/lib/mysql
+            - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+            - ./mysql/sql:/docker-entrypoint-initdb.d
+        ports:
+            - 3306:3306
 
-    shumipro_api:
+    icchannel_api:
         image: zenika/kotlin:latest
         ports:
             - "8080:8080"
         working_dir: /app
         volumes:
-            - "./shumipro_api/build/libs:/app"
+            - "./IcchannelBackend/build/libs:/app"
         environment:
-            SPRING_PROFILES_ACTIVE: docker
-            DB_USERNAME: $DB_USERNAME
-            DB_PASSWORD: $DB_PASSWORD
+            SPRING_PROFILES_ACTIVE: production
             FRONT_ORIGIN: $FRONT_ORIGIN
-            API_TOKEN_SECRET_KEY: $API_TOKEN_SECRET_KEY
             TZ: Asia/Tokyo
-        command: ["java", "-jar", "shumipro_api-0.0.1-SNAPSHOT.war"]
+        command: ["java", "-jar", "IcchannelBackend-0.0.1-SNAPSHOT.war"]
 
-    shumipro_front:
+    icchannel_front:
         image: node:14.15.5
         ports:
             - "3000:3000"
         working_dir: /app
         volumes:
-            - "./shumipro_front:/app"
+            - "./icchannel_frontend:/app"
         environment:
             NEXT_PUBLIC_API_SERVER: $NEXT_PUBLIC_API_SERVER
-        command: [sh, -c, npm run start]
+        command: [sh, -c, yarn start]
 
     nginx:
         image: "nginx:latest"
@@ -55,16 +56,16 @@ services:
             - 443:443
             - 18080:18080
         volumes:
-            - ./shumipro_front/out:/var/www/html
+            - ./icchannel_front/out:/var/www/html
             - ./nginx:/etc/nginx/conf.d
             - ./letsencrypt:/etc/letsencrypt
         depends_on:
-            - shumipro_front
+            - icchannel_front
 
     certbot:
         image: certbot/certbot:v1.7.0
         volumes:
             - ./letsencrypt:/etc/letsencrypt
-            - ./shumipro_front/out:/var/www/html
+            - ./icchannel_front/out:/var/www/html
         command: ["--version"]
 
