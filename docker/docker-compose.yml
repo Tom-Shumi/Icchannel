@@ -8,34 +8,17 @@ services:
         volumes:
             - "./data/redis:/data/redis"
 
-    mysql:
-        image: "mysql:latest"
-        container_name: icchannel_db
-        environment:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: icchannel_db
-            MYSQL_USER: shumiya
-            MYSQL_PASSWORD: shumiya
-            TZ: 'Asia/Tokyo'
-        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-        volumes:
-            - ./mysql/data:/var/lib/mysql
-            - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-            - ./mysql/sql:/docker-entrypoint-initdb.d
-        ports:
-            - 3306:3306
-
-    elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
-        environment:
-            - discovery.type=single-node
-            - cluster.name=docker-cluster
-            - bootstrap.memory_lock=true
-            - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
-        ports:
-            - 9200:9200
-        volumes:
-            - ./es-data:/usr/share/elasticsearch/data
+    # elasticsearch:
+    #     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    #     environment:
+    #         - discovery.type=single-node
+    #         - cluster.name=docker-cluster
+    #         - bootstrap.memory_lock=true
+    #         - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    #     ports:
+    #         - 9200:9200
+    #     volumes:
+    #         - ./es-data:/usr/share/elasticsearch/data
 
     icchannel_api:
         image: zenika/kotlin:latest
@@ -47,6 +30,7 @@ services:
         environment:
             SPRING_PROFILES_ACTIVE: production
             FRONT_ORIGIN: $FRONT_ORIGIN
+            ELASTICSEARCH_SERVER: $ELASTICSEARCH_SERVER
             TZ: Asia/Tokyo
         command: ["java", "-jar", "IcchannelBackend-0.0.1-SNAPSHOT.war"]
 
@@ -68,7 +52,7 @@ services:
             - 443:443
             - 18080:18080
         volumes:
-            - ./icchannel_front/out:/var/www/html
+            - ./icchannel_frontend/out:/var/www/html
             - ./nginx:/etc/nginx/conf.d
             - ./letsencrypt:/etc/letsencrypt
         depends_on:
@@ -78,6 +62,6 @@ services:
         image: certbot/certbot:v1.7.0
         volumes:
             - ./letsencrypt:/etc/letsencrypt
-            - ./icchannel_front/out:/var/www/html
+            - ./icchannel_frontend/out:/var/www/html
         command: ["--version"]
 
